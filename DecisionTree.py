@@ -13,7 +13,11 @@ def decisionTreeLearning(examples, attributes, parentExamples):
         return pluralityValue(examples)
     else:
         A = argmax(importance(a, examples))
-        tree =
+        decTree = tree.DecisionTreeClassifier()
+        for each v in A:
+            exs = e such that e is in examples and e.A = v
+            subTree = decisionTreeLearning(exs, attributes - A, examples)
+            add a branch to decTree with label A = v  and subTree as subtree
     return tree
 
 def pluralityValue(set):
