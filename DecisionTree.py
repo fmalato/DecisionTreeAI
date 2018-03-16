@@ -5,7 +5,7 @@ from sklearn.datasets import load_iris
 import graphviz
 
 def decisionTreeLearning(examples, attributes, parentExamples):
-    if examples is empty:
+    if not examples:
         return pluralityValue(parentExamples)
     elif all examples have the same classification:
         return classification
@@ -18,7 +18,7 @@ def decisionTreeLearning(examples, attributes, parentExamples):
             exs = e such that e is in examples and e.A = v
             subTree = decisionTreeLearning(exs, attributes - A, examples)
             add a branch to decTree with label A = v  and subTree as subtree
-    return tree
+    return decTree
 
 def pluralityValue(set):
     return set
