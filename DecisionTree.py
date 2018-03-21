@@ -6,11 +6,16 @@ import sklearn
 from sklearn import tree
 from sklearn import datasets
 from sklearn.model_selection import cross_val_score
+import csv
 
-attributes = ["fixed acidity", "volatile acidity", "citric acid", "residual sugar", "chlorides", "free sulfur dioxide",
-              "total sulfur dioxide", "density", "pH", "sulphates", "alcohol", "quality"]
-trainingSet = pd.read_csv('/home/federico/Scrivania/Intelligenza Artificiale/Data Sets/winequality-white.csv', sep=';',
-                          names=attributes, skiprows=1)
+csvFile = csv.reader(file('/home/federico/Scrivania/Intelligenza Artificiale/Data Sets/winequality-white.csv'), delimiter=";")
+trainingSet = list(csvFile)
+attributes = trainingSet[0]
+del trainingSet[0]
+
+dictionarySet = {}
+for j in range(len(attributes)):
+    dictionarySet[attributes[j]] = [i[j] for i in trainingSet]
 
 
 def decisionTreeLearning(trainingSet, attributes):
@@ -23,7 +28,7 @@ def decisionTreeLearning(trainingSet, attributes):
         return pluralityValue(trainingSet)
     else:
         for j in attributes:
-            A = [np.argmax(gain(trainingSet, attributes, j))]
+            A = [np.argmax(dictionarySet[j])]
         decTree = tree.DecisionTreeClassifier(trainingSet, attributes)
         for v in A:
             ### exs = [e.A for e in trainingSet if e.A = v]

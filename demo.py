@@ -1,11 +1,23 @@
 import pandas as pd
 import numpy as np
 import math
+import csv
 
-attributes = ["fixed acidity", "volatile acidity", "citric acid", "residual sugar", "chlorides", "free sulfur dioxide",
-              "total sulfur dioxide", "density", "pH", "sulphates", "alcohol", "quality"]
-trainingSet = pd.read_csv('/home/federico/Scrivania/Intelligenza Artificiale/Data Sets/winequality-white.csv', sep=';',
-                          names=attributes, skiprows=1)
+csvFile = csv.reader(file('/home/federico/Scrivania/Intelligenza Artificiale/Data Sets/winequality-white.csv'), delimiter=";")
+trainingSet = list(csvFile)
+attributes = trainingSet[0]
+del trainingSet[0]
 
+dictionarySet = {}
+for j in range(len(attributes)):
+    dictionarySet[attributes[j]] = [i[j] for i in trainingSet]
+print attributes
+print
 print trainingSet
+print
+print "trainingSet length: " + str(len(trainingSet))
+print "trainingSet element length: " + str(len(trainingSet[0]))
+print "attributes length: " + str(len(attributes))
+print
+print dictionarySet
 
