@@ -3,7 +3,7 @@ import numpy as np
 import graphviz as gv
 import math
 import sklearn
-import Tree
+import TreeCreation as tr
 from sklearn import tree
 from sklearn import datasets
 from sklearn.model_selection import cross_val_score
@@ -35,16 +35,20 @@ def decisionTreeLearning(trainingSet, attributes, attrIndex, dictionarySet):
         return pluralityValue(trainingSet)
     else:
         k = 0
+        maxGain = 0
         gains = np.zeros(len(attributes))
         for j in attributes:
-            gains[k] = gain(dictionarySet, attrIndex[k], k)
+            gains[k] = gain(dictionarySet[j], attrIndex[k], k)
+            if gains[k] > maxGain:
+                maxGain = gains[k]
+                maxGainIndex = k
             k += 1
-        A = max(gains)
-        decTree = Tree(A)
+        A = dictionarySet[attributes[maxGainIndex]]
+        decTree = tr.Tree()
         for v in A:
-            #exs = [e.A for e in trainingSet if e.A = v]
-            exs = filter(lambda e: e.A == v, trainingSet)
-            subTree = decisionTreeLearning(exs, attributes - A)
+            #exs = [e for e in dictionarySet[attributes[maxGainIndex]] if e.A = v]
+            exs = [filter(lambda e: e == v, A)] # Doesn't do what it should do
+            subTree = decisionTreeLearning(exs, attributes - A, attrIndex - k, dictionarySet - dictionarySet[attributes[k]])
             scores = cross_val_score(decTree, trainingSet, exs, cv=5)
             #add a branch to decTree with label A = v and subTree as subtree
     return decTree
@@ -87,10 +91,10 @@ def entropy(data, target_attr):
 
     # Calculate the frequency of each of the values in the target attr
     for record in data:
-        if (record[target_attr] in val_freq):
-            val_freq[record[target_attr]] += 1.0
+        if (record in val_freq):
+            val_freq[record] += 1.0
         else:
-            val_freq[record[target_attr]] = 1.0
+            val_freq[record] = 1.0
 
     # Calculate the entropy of the data for the target attribute
     for freq in val_freq.values():
@@ -109,21 +113,22 @@ def gain(data, attr, target_attr):
 
     # Calculate the frequency of each of the values in the target attribute
     for record in data:
-        if (record[target_attr] in val_freq):
-            val_freq[record[attr]] += 1.0
+        if(record in val_freq):
+            val_freq[record] += 1.0
         else:
-            val_freq[record[attr]] = 1.0
+            val_freq[record] = 1.0
 
     # Calculate the sum of the entropy for each subset of records weighted
     # by their probability of occuring in the training set.
     for val in val_freq.keys():
         val_prob = val_freq[val] / sum(val_freq.values())
-        data_subset = [record for record in data if record[attr] == val]
+        data_subset = [record for record in data if record == val]
         subset_entropy += val_prob * entropy(data_subset, target_attr)
 
     # Subtract the entropy of the chosen attribute from the entropy of the
     # whole data set with respect to the target attribute (and return it)
     return (entropy(data, target_attr) - subset_entropy)
 
+print dictionarySet
 dt = decisionTreeLearning(trainingSet, attributes, attrIndex, dictionarySet)
 print dt

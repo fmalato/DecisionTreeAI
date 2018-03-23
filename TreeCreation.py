@@ -1,7 +1,7 @@
 class Tree(object):
-    def __init__(self, root):
+    def __init__(self):
         self.left = None
         self.right = None
         self.data = None
-        self.root = root
+        self.root = None
 
