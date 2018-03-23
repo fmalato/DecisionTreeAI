@@ -3,36 +3,47 @@ import numpy as np
 import graphviz as gv
 import math
 import sklearn
+import Tree
 from sklearn import tree
 from sklearn import datasets
 from sklearn.model_selection import cross_val_score
 import csv
 
-csvFile = csv.reader(file('/home/federico/Scrivania/Intelligenza Artificiale/Data Sets/winequality-white.csv'), delimiter=";")
+csvFile = csv.reader(file('/home/federico/Scrivania/Intelligenza Artificiale/Data Sets/shuttle.csv'), delimiter=",")
 trainingSet = list(csvFile)
 attributes = trainingSet[0]
+attrIndex = range(len(attributes))
 del trainingSet[0]
+A = np.zeros(7)
 
 dictionarySet = {}
 for j in range(len(attributes)):
     dictionarySet[attributes[j]] = [i[j] for i in trainingSet]
 
 
-def decisionTreeLearning(trainingSet, attributes):
 
-    values = [record["density"] for record in trainingSet]
+def decisionTreeLearning(trainingSet, attributes, attrIndex, dictionarySet):
 
-    if all(x["quality"] == x["quality"] for x in trainingSet):
-        return trainingSet[0, "quality"]
-    elif not attributes:
+    #values = [record["density"] for record in trainingSet]
+
+    for i in range(len(trainingSet)):
+        if (dictionarySet['Target'][0] != dictionarySet['Target'][i+1]):
+            break
+        elif dictionarySet['Target'][0] == dictionarySet['Target'][i+1] and i == len(trainingSet):
+            return dictionarySet['Target'][0]
+    if not attributes:
         return pluralityValue(trainingSet)
     else:
+        k = 0
+        gains = np.zeros(len(attributes))
         for j in attributes:
-            A = [np.argmax(dictionarySet[j])]
-        decTree = tree.DecisionTreeClassifier(trainingSet, attributes)
+            gains[k] = gain(dictionarySet, attrIndex[k], k)
+            k += 1
+        A = max(gains)
+        decTree = Tree(A)
         for v in A:
-            ### exs = [e.A for e in trainingSet if e.A = v]
-            exs = filter(lambda e: e.A ==v, trainingSet)
+            #exs = [e.A for e in trainingSet if e.A = v]
+            exs = filter(lambda e: e.A == v, trainingSet)
             subTree = decisionTreeLearning(exs, attributes - A)
             scores = cross_val_score(decTree, trainingSet, exs, cv=5)
             #add a branch to decTree with label A = v and subTree as subtree
@@ -76,7 +87,7 @@ def entropy(data, target_attr):
 
     # Calculate the frequency of each of the values in the target attr
     for record in data:
-        if (val_freq.has_key(record[target_attr])):
+        if (record[target_attr] in val_freq):
             val_freq[record[target_attr]] += 1.0
         else:
             val_freq[record[target_attr]] = 1.0
@@ -98,7 +109,7 @@ def gain(data, attr, target_attr):
 
     # Calculate the frequency of each of the values in the target attribute
     for record in data:
-        if (val_freq.has_key(record[attr])):
+        if (record[target_attr] in val_freq):
             val_freq[record[attr]] += 1.0
         else:
             val_freq[record[attr]] = 1.0
@@ -114,4 +125,5 @@ def gain(data, attr, target_attr):
     # whole data set with respect to the target attribute (and return it)
     return (entropy(data, target_attr) - subset_entropy)
 
-print decisionTreeLearning(trainingSet, attributes)
+dt = decisionTreeLearning(trainingSet, attributes, attrIndex, dictionarySet)
+print dt
