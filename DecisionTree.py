@@ -1,12 +1,11 @@
-import pandas as pd
 import numpy as np
 import graphviz as gv
 import math
-import sklearn
-import TreeCreation as tr
-from sklearn import tree
-from sklearn import datasets
-from sklearn.model_selection import cross_val_score
+import anytree
+from anytree.exporter import dotexporter as dotexp
+import matplotlib.pyplot as plt
+import copy
+import networkx as netx
 import csv
 
 csvFile = csv.reader(file('/home/federico/Scrivania/Intelligenza Artificiale/Data Sets/shuttle.csv'), delimiter=",")
@@ -14,44 +13,66 @@ trainingSet = list(csvFile)
 attributes = trainingSet[0]
 attrIndex = range(len(attributes))
 del trainingSet[0]
-A = np.zeros(7)
+A = np.zeros(len(attributes))
 
 dictionarySet = {}
 for j in range(len(attributes)):
     dictionarySet[attributes[j]] = [i[j] for i in trainingSet]
 
-
+targets = copy.deepcopy(dictionarySet['Target'])
+del dictionarySet['Target']
+del attributes[attrIndex[6]]
+del attrIndex[6]
 
 def decisionTreeLearning(trainingSet, attributes, attrIndex, dictionarySet):
 
+    localTraining = copy.deepcopy(trainingSet)
+    localAttr = copy.deepcopy(attributes)
+    localIndex = copy.deepcopy(attrIndex)
+    localDict = copy.deepcopy(dictionarySet)
     #values = [record["density"] for record in trainingSet]
-
     for i in range(len(trainingSet)):
-        if (dictionarySet['Target'][0] != dictionarySet['Target'][i+1]):
+        if (targets[0] != targets[i+1]):
             break
-        elif dictionarySet['Target'][0] == dictionarySet['Target'][i+1] and i == len(trainingSet):
-            return dictionarySet['Target'][0]
-    if not attributes:
-        return pluralityValue(trainingSet)
+        elif targets[0] == targets[i+1] and i == len(localTraining):
+            return targets[0]
+    if not localAttr:
+        return pluralityValue(localTraining)
     else:
         k = 0
         maxGain = 0
-        gains = np.zeros(len(attributes))
-        for j in attributes:
-            gains[k] = gain(dictionarySet[j], attrIndex[k], k)
+        gains = np.zeros(len(localAttr))
+        for j in localAttr:
+            gains[k] = gain(localDict[j], localIndex[k], k)
             if gains[k] > maxGain:
                 maxGain = gains[k]
                 maxGainIndex = k
             k += 1
-        A = dictionarySet[attributes[maxGainIndex]]
-        decTree = tr.Tree()
-        for v in A:
-            #exs = [e for e in dictionarySet[attributes[maxGainIndex]] if e.A = v]
-            exs = [filter(lambda e: e == v, A)] # Doesn't do what it should do
-            subTree = decisionTreeLearning(exs, attributes - A, attrIndex - k, dictionarySet - dictionarySet[attributes[k]])
-            scores = cross_val_score(decTree, trainingSet, exs, cv=5)
-            #add a branch to decTree with label A = v and subTree as subtree
+        A = localDict[localAttr[maxGainIndex]]
+        A = set(A)
+        #decTree = anytree.Node(localAttr[maxGainIndex])
+        decTree = netx.Graph()
+        decTree.add_node(localAttr[maxGainIndex], root=True)
+        subDictionary = arraySubtraction(localDict, localAttr[maxGainIndex])
+        subAttributes = arraySubtraction(localAttr, maxGainIndex)
+        subAttrIndex = arraySubtraction(localIndex, maxGainIndex)
+        for v in localTraining:
+            del v[maxGainIndex]
+        subTree = []
+        for value in A:
+            #exs = [e for e in dictionarySet[attributes[maxGainIndex]] if e == value]
+            #exs = [filter(lambda e: e == v, A)] # Doesn't do what it should
+            #newNode = anytree.Node(decisionTreeLearning(localTraining, subAttributes, subAttrIndex, subDictionary), parent=decTree)
+            newNode = decisionTreeLearning(localTraining, subAttributes, subAttrIndex, subDictionary)
+            decTree.add_path(newNode)
+            #subTree.append(newNode)
+            #subTree.name = attributes[maxGainIndex]
+            #decTree.children = subTree
     return decTree
+
+def arraySubtraction(array, attribute):
+    del array[attribute]
+    return array
 
 def pluralityValue(set):
     lst = set[:]
@@ -129,6 +150,8 @@ def gain(data, attr, target_attr):
     # whole data set with respect to the target attribute (and return it)
     return (entropy(data, target_attr) - subset_entropy)
 
-print dictionarySet
 dt = decisionTreeLearning(trainingSet, attributes, attrIndex, dictionarySet)
-print dt
+#print anytree.RenderTree(dt)
+#dotexp.DotExporter(dt).to_picture("dt.png")
+netx.draw_networkx(dt)
+plt.show()

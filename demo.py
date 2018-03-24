@@ -2,8 +2,10 @@ import pandas as pd
 import numpy as np
 import math
 import csv
+import anytree
+from anytree.exporter import dotexporter as dotexp
 
-csvFile = csv.reader(file('/home/federico/Scrivania/Intelligenza Artificiale/Data Sets/shuttle.csv'), delimiter=",")
+"""csvFile = csv.reader(file('/home/federico/Scrivania/Intelligenza Artificiale/Data Sets/shuttle.csv'), delimiter=",")
 trainingSet = list(csvFile)
 attributes = trainingSet[0]
 del trainingSet[0]
@@ -29,5 +31,13 @@ print dictionarySet['Stability']
 print
 print "dictionary length: " + str(len(dictionarySet))
 print
-print A
+print A"""
 
+magnitude = anytree.Node(name='magnitude')
+visibility = []
+error = []
+for i in range(5):
+    visibility.append(anytree.Node(name='visibility' + str(i), parent=magnitude))
+    for j in range(2):
+        error.append(anytree.Node(name='error' + str(i) + ',' + str(j), parent=visibility[i]))
+dotexp.DotExporter(magnitude).to_picture("demoTree.png")
