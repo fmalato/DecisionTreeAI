@@ -8,7 +8,7 @@ import copy
 import networkx as netx
 import csv
 
-csvFile = csv.reader(file('/home/federico/Scrivania/Intelligenza Artificiale/Data Sets/shuttle.csv'), delimiter=",")
+csvFile = csv.reader(file('/home/federico/Scrivania/Intelligenza Artificiale/Data Sets/playtennis.csv'), delimiter=",")
 trainingSet = list(csvFile)
 attributes = trainingSet[0]
 attrIndex = range(len(attributes))
@@ -19,56 +19,56 @@ dictionarySet = {}
 for j in range(len(attributes)):
     dictionarySet[attributes[j]] = [i[j] for i in trainingSet]
 
-targets = copy.deepcopy(dictionarySet['Target'])
-del dictionarySet['Target']
-del attributes[attrIndex[6]]
-del attrIndex[6]
+"""targets = copy.deepcopy(dictionarySet['PlayTennis'])
+del dictionarySet['PlayTennis']
+del attributes[attrIndex[4]]
+del attrIndex[4]"""
+#targets = range(len(attributes))
 
-def decisionTreeLearning(trainingSet, attributes, attrIndex, dictionarySet):
+def decisionTreeLearning(trainingSet, attributes, attrIndex, dictionarySet, targetAttr):
 
     localTraining = copy.deepcopy(trainingSet)
     localAttr = copy.deepcopy(attributes)
     localIndex = copy.deepcopy(attrIndex)
     localDict = copy.deepcopy(dictionarySet)
-    #values = [record["density"] for record in trainingSet]
-    for i in range(len(trainingSet)):
-        if (targets[0] != targets[i+1]):
-            break
-        elif targets[0] == targets[i+1] and i == len(localTraining):
-            return targets[0]
-    if not localAttr:
+
+    vals = [record for record in dictionarySet[targetAttr]]
+
+    if not dictionarySet or (len(localAttr) - 1) <= 0:
         return pluralityValue(localTraining)
+    elif localDict[targetAttr].count(localDict[targetAttr][0]) == len(localDict[targetAttr]):
+        return localDict[targetAttr][0]
     else:
-        k = 0
-        maxGain = 0
-        gains = np.zeros(len(localAttr))
-        for j in localAttr:
-            gains[k] = gain(localDict[j], localIndex[k], k)
-            if gains[k] > maxGain:
-                maxGain = gains[k]
-                maxGainIndex = k
-            k += 1
+        maxGain, maxGainIndex = chooseBestAttribute(localAttr, localDict, localIndex, targetAttr)
+
         A = localDict[localAttr[maxGainIndex]]
         A = set(A)
-        #decTree = anytree.Node(localAttr[maxGainIndex])
-        decTree = netx.Graph()
-        decTree.add_node(localAttr[maxGainIndex], root=True)
+
+        best = localAttr[maxGainIndex]
         subDictionary = arraySubtraction(localDict, localAttr[maxGainIndex])
         subAttributes = arraySubtraction(localAttr, maxGainIndex)
         subAttrIndex = arraySubtraction(localIndex, maxGainIndex)
         for v in localTraining:
             del v[maxGainIndex]
-        subTree = []
-        for value in A:
-            #exs = [e for e in dictionarySet[attributes[maxGainIndex]] if e == value]
-            #exs = [filter(lambda e: e == v, A)] # Doesn't do what it should
-            #newNode = anytree.Node(decisionTreeLearning(localTraining, subAttributes, subAttrIndex, subDictionary), parent=decTree)
-            newNode = decisionTreeLearning(localTraining, subAttributes, subAttrIndex, subDictionary)
-            decTree.add_path(newNode)
-            #subTree.append(newNode)
-            #subTree.name = attributes[maxGainIndex]
-            #decTree.children = subTree
+        decTree = {best: {}}
+        # Create a new decision tree/sub-node for each of the values in the
+        # best attribute field
+        for val in A:
+            # Create a subtree for the current value under the "best" field
+            subtree = decisionTreeLearning(localTraining, subAttributes, subAttrIndex, subDictionary, targetAttr)
+
+            # Add the new subtree to the empty dictionary object in our new
+            # tree/node we just created.
+            decTree[best][val] = subtree
+
     return decTree
+
+def getExamples(data, best, value):
+    A = []
+    for record in data[best]:
+        if record == value:
+            A.append(record)
+    return A
 
 def arraySubtraction(array, attribute):
     del array[attribute]
@@ -85,6 +85,19 @@ def pluralityValue(set):
             highestFreq = lst.count(val)
 
     return mostFreq
+
+def chooseBestAttribute(attr, dict, index, target):
+    k = 0
+    maxGain = 0
+    maxGainIndex = 0
+    gains = np.zeros(len(attr))
+    for j in attr:
+        gains[k] = gain(dict[j], index[k], k)
+        if gains[k] > maxGain:
+            maxGain = gains[k]
+            maxGainIndex = k
+        k += 1
+    return maxGain, maxGainIndex
 
 def unique(lst):
     """
@@ -150,8 +163,7 @@ def gain(data, attr, target_attr):
     # whole data set with respect to the target attribute (and return it)
     return (entropy(data, target_attr) - subset_entropy)
 
-dt = decisionTreeLearning(trainingSet, attributes, attrIndex, dictionarySet)
+dt = decisionTreeLearning(trainingSet, attributes, attrIndex, dictionarySet, 'PlayTennis')
 #print anytree.RenderTree(dt)
 #dotexp.DotExporter(dt).to_picture("dt.png")
-netx.draw_networkx(dt)
-plt.show()
+print dt
