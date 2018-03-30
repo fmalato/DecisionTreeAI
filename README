@@ -1,0 +1,34 @@
+##############################
+#### PROGRAM UTILIZATION: ####
+##############################
+
+1. Set the program:
+   For a proper use of the program, you need to set the local path to the chosen data set.
+   The program provides this function at line 15 in the "demo.py" file. Set it correctly, or it won't work.
+
+   As a second rule, you must either place the target attribute as the rightmost attribute in your data set or
+   change the targetAttr assignment in line 18, looking for the right values in your data set.
+
+   Remember also to set the proper delimiter (line 15). Else, the program won't crash, but won't even work properly.
+
+2. How to read the output:
+   The program will print a bunch of values, arrows and names, like this one:
+
+   density
+	--->	0.99754
+			alcohol
+				--->	9.4
+								----->	5
+				--->	10
+								----->	6
+				--->	8.8
+								----->	5
+
+	the output has the following rules:
+	- Each name stands for a node name, which stands for a specific attribute of the data set;
+	- Each arrows stands for a branch, i.e. a different unique value of the attribute upon the arrow;
+	- Each number stands for a unique value of the splitter attribute, which is the weight of that specific branch;
+	- If there's another arrows under a number, without any label, it means that there's no need to split on another
+	  attribute. In that case, every branch leads to a leaf;
+	- If there are no more arrows nor labels after a number, it means that such a number is a leaf of the tree.
+

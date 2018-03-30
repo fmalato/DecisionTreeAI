@@ -1,43 +1,30 @@
-import pandas as pd
 import numpy as np
+import graphviz as gv
 import math
-import csv
-import anytree
+from anytree import Node, RenderTree
 from anytree.exporter import dotexporter as dotexp
+import matplotlib.pyplot as plt
+import copy
+import networkx as netx
+import csv
+import DecisionTree as dt
+import sys
 
-"""csvFile = csv.reader(file('/home/federico/Scrivania/Intelligenza Artificiale/Data Sets/shuttle.csv'), delimiter=",")
-trainingSet = list(csvFile)
-attributes = trainingSet[0]
-del trainingSet[0]
-A = np.zeros(7)
+sys.setrecursionlimit(1000000)
 
-dictionarySet = {}
-for j in range(len(attributes)):
-    dictionarySet[attributes[j]] = [i[j] for i in trainingSet]
-    k = 0
-for j in attributes:
-    A[k] = max(dictionarySet[j]) # print values, but not max values
-    k += 1
+csvFile = csv.reader(file('/home/federico/Scrivania/Intelligenza Artificiale/Data Sets/playtennis.csv'), delimiter=",")
+inputFile = list(csvFile)
+attributes = inputFile[0]
+targetAttr = attributes[len(attributes) - 1]
+A = np.zeros(len(attributes))
 
-print attributes
-print
-print trainingSet
-print
-print "trainingSet length: " + str(len(trainingSet))
-print "trainingSet element length: " + str(len(trainingSet[0]))
-print "attributes length: " + str(len(attributes))
-print
-print dictionarySet['Stability']
-print
-print "dictionary length: " + str(len(dictionarySet))
-print
-print A"""
+examples = copy.deepcopy(inputFile)
+del examples[0]
 
-magnitude = anytree.Node(name='magnitude')
-visibility = []
-error = []
-for i in range(5):
-    visibility.append(anytree.Node(name='visibility' + str(i), parent=magnitude))
-    for j in range(2):
-        error.append(anytree.Node(name='error' + str(i) + ',' + str(j), parent=visibility[i]))
-dotexp.DotExporter(magnitude).to_picture("demoTree.png")
+trainingSet = []
+for line in examples:
+    trainingSet.append(dict(zip(attributes, [datum.strip() for datum in line])))
+
+decTree = dt.decisionTreeLearning(trainingSet, attributes, targetAttr)
+dt.printTree(decTree, "")
+
