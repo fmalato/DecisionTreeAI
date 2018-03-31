@@ -1,6 +1,8 @@
 import numpy as np
 import copy
 
+import DecisionTree as dt
+
 def partition(vector, fold, k):
     setSize = len(vector)
     start = (setSize/k)*(fold)
@@ -38,3 +40,21 @@ def errorRate(heuristic, vector):
             errV += 0.5
     return errT, errV
 
+def classify(inputTree, attrs, testVec, classLabel):
+    firstStr = list(inputTree)[0]
+    secondDict = inputTree[firstStr]
+    attrIndex = attrs.index(firstStr)
+    alreadyDone = []
+    default = float(dt.pluralityValue([x for x in testVec[len(testVec) - 1]]))
+    for el in testVec:
+        if el not in alreadyDone:
+            if el[attrIndex] in secondDict:
+                valueOfAttr = secondDict[el[attrIndex]]
+            else:
+                valueOfAttr = int(default)
+            if isinstance(valueOfAttr, dict):
+                alreadyDone = classify(valueOfAttr, attrs, [el], classLabel)
+            else:
+                classLabel.append(valueOfAttr)
+                alreadyDone.append(el)
+    return alreadyDone

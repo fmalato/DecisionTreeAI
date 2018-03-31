@@ -10,7 +10,7 @@ import CrossValidation as cv
 
 sys.setrecursionlimit(1000000)
 
-csvFile = csv.reader(file('/home/federico/Scrivania/Intelligenza Artificiale/Data Sets/playtennis.csv'), delimiter=",")
+csvFile = csv.reader(file('/home/federico/Scrivania/Intelligenza Artificiale/Data Sets/shuttle.csv'), delimiter=",")
 inputFile = list(csvFile)
 attributes = inputFile[0]
 targetAttr = attributes[len(attributes) - 1]
@@ -23,7 +23,7 @@ trainingSet = []
 for line in examples:
     trainingSet.append(dict(zip(attributes, [datum.strip() for datum in line])))
 
-train, validation = cv.train_test_split(examples, len(examples)*0.5, len(examples) - 1)
+train, validation = cv.train_test_split(examples, len(examples)*0.65, len(examples) - 1)
 
 training = []
 for line in train:
@@ -33,7 +33,7 @@ decTree = dt.decisionTreeLearning(trainingSet, attributes, targetAttr)
 util.printTree(decTree, "")
 
 lista = []
-dt.classify(decTree, [attr for attr in attributes if attr != targetAttr], validation, lista)
+cv.classify(decTree, [attr for attr in attributes if attr != targetAttr], validation, lista)
 
 k = 0
 correct = 0

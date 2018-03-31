@@ -100,20 +100,3 @@ def unique(lst):
     # Return the list with all redundant values removed.
     return uniqueLst
 
-def classify(inputTree, attrs, testVec, classLabel):
-    firstStr = list(inputTree)[0]
-    secondDict = inputTree[firstStr]
-    attrIndex = attrs.index(firstStr)
-    alreadyDone = []
-    for el in testVec:
-        if el not in alreadyDone:
-            if el[attrIndex] in secondDict:
-                valueOfAttr = secondDict[el[attrIndex]]
-            else:
-                valueOfAttr = 'Not found'
-            if isinstance(valueOfAttr, dict):
-                alreadyDone = classify(valueOfAttr, attrs, [el], classLabel)
-            else:
-                classLabel.append(valueOfAttr)
-                alreadyDone.append(el)
-    return alreadyDone
