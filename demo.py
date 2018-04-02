@@ -27,7 +27,7 @@ trainingSet = []
 for line in examples:
     trainingSet.append(dict(zip(attributes, [datum.strip() for datum in line])))
 # Useful for some datasets, where the target attribute's values are already sorted.
-random.shuffle(examples)
+# random.shuffle(examples)
 # Useful to make sure that there's a correct split of the dataset.
 """train, validation = cv.train_test_split(examples, len(examples)*0.5, len(examples) - 1)
 # While coding, I found that some algorithm just performed better using a dictionary, some others were better
@@ -73,7 +73,7 @@ def unknownDataTest(examples, attributes, target, times):
     # iteration.
     for j in range(times):
         print "####################"
-        print "### iterazione " + str(j) + " ###"
+        print "### iterazione " + str(j+1) + " ###"
         print "####################"
         # random.shuffle(examples) ## This line just shuffles the examples array, so tests are randomized.
         train, validation = cv.train_test_split(examples, (len(examples)/times) * j, len(examples) - 1)
@@ -88,8 +88,8 @@ def unknownDataTest(examples, attributes, target, times):
         correct = 0
         for el in classification:
             actual = validation[k][attributes.index(targetAttr)]
-            print "Input: " + str(validation[k])
-            print "Atteso: " + str(validation[k][attributes.index(targetAttr)]) + "  " + "Trovato: " + str(el)
+            """print "Input: " + str(validation[k])
+            print "Atteso: " + str(validation[k][attributes.index(targetAttr)]) + "  " + "Trovato: " + str(el) """
             if actual == el:
                 correct += 1
             k += 1
@@ -100,4 +100,60 @@ def unknownDataTest(examples, attributes, target, times):
         foldErrT, foldErrV = cv.kFoldCrossValidation(decisionTree, 5, examples, targetAttr, attributes, default)
         print "FoldErrT: " + str(foldErrT) + "  FoldErrV: " + str(foldErrV)
 
-unknownDataTest(examples, attributes, targetAttr, 5)
+# unknownDataTest(examples, attributes, targetAttr, 5)
+
+def chooseBestAttribute(data, attributes, target, criterion, exs):
+    data = data[:]
+    bestGain = 0.0
+    bestAttr = None
+
+    if criterion != 'gini':
+        for attr in attributes:
+            if criterion == 'gain':
+                gainAttr = heur.gain(data, attr, target)
+                if (gainAttr >= bestGain and attr != target):
+                    bestGain = gainAttr
+                    bestAttr = attr
+            else:
+                gainAttr = heur.entropy(data, target)
+                if (gainAttr >= bestGain and attr != target):
+                    bestGain = gainAttr
+                    bestAttr = attr
+    else:
+        bestGain, index = heur.giniIndex(exs, attributes)
+        bestAttr = attributes[index]
+    return bestAttr
+
+def decisionTreeLearning(trainingSet, attributes, targetAttr, exs, samples, criterion='gain'):
+
+    localTraining = copy.deepcopy(trainingSet)
+    localAttr = copy.deepcopy(attributes)
+    samples = copy.deepcopy(samples)
+    values = [record[targetAttr] for record in trainingSet]
+
+    default = dt.pluralityValue(localTraining)
+
+    if not localTraining or ((len(localAttr) - 1) <= 0):
+        return default
+    elif values.count(values[0]) == len(values):
+        return values[0]
+    else:
+        maxGainAttr = chooseBestAttribute(localTraining, attributes, targetAttr, criterion, samples)
+        decTree = {maxGainAttr: {}}
+        # Create a new decision tree/sub-node for each of the values in the
+        # best attribute field
+        for x in samples:
+            del x[attributes.index(maxGainAttr)]
+        for value in dt.getValues(trainingSet, maxGainAttr):
+            # Create a subtree for the current value under the "best" field
+            subtree = decisionTreeLearning(dt.getExamples(localTraining, maxGainAttr, value),
+                                           [attr for attr in attributes if attr is not maxGainAttr],
+                                           targetAttr, exs, samples, criterion)
+
+            # Add the new subtree to the empty dictionary object in our new
+            # tree/node we just created.
+            decTree[maxGainAttr][value] = subtree
+    return decTree
+
+dec = decisionTreeLearning(trainingSet, attributes, targetAttr,  examples, examples, criterion='gain')
+print dec

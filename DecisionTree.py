@@ -53,7 +53,7 @@ def getExamples(data, attr, value):
 
 def getValues(data, attribute):
     data = data[:]
-    return unique([record[attribute] for record in data])
+    return util.unique([record[attribute] for record in data])
 
 def arraySubtraction(array, attribute):
     del array[attribute]
@@ -64,7 +64,7 @@ def pluralityValue(data):
     highestFreq = 0
     mostFreq = None
 
-    for val in unique(lst):
+    for val in util.unique(lst):
         if lst.count(val) > highestFreq:
             mostFreq = val
             highestFreq = lst.count(val)
@@ -83,20 +83,4 @@ def chooseBestAttribute(data, attributes, target):
             bestAttr = attr
 
     return bestAttr
-
-def unique(lst):
-    """
-    Returns a list made up of the unique values found in lst.  i.e., it
-    removes the redundant values in lst.
-    """
-    lst = lst[:]
-    uniqueLst = []
-
-    # Cycle through the list and add each value to the unique list only once.
-    for item in lst:
-        if uniqueLst.count(item) <= 0:
-            uniqueLst.append(item)
-
-    # Return the list with all redundant values removed.
-    return uniqueLst
 
