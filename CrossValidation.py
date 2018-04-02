@@ -21,24 +21,33 @@ def train_test_split(dataset, start, end):
     val = examples[start:end]
     return train, val
 
-def crossValidation(learner, size, k, examples):
+def kFoldCrossValidation(tree, k, examples, target, attributes, default):
     foldErrT = 0
     foldErrV = 0
-    for fold in range(1, k):
-        trainingSet, validationSet = partition(examples, fold, k)
-        h = learner(size, trainingSet)
-        foldErrT += errorRate(h, trainingSet)
-        foldErrV += errorRate(h, validationSet)
-    return foldErrT/k, foldErrV/k
+    for fold in range(0, k - 1):
+        # Must change last two parameters in the function call...
+        trainSet, validSet = train_test_split(examples, (fold*len(examples))/k, ((fold + 1)*len(examples))/k)
+        classificationTrain = classify(tree, trainSet, attributes, default)
+        classification = classify(tree, validSet, attributes, default)
+        for element in trainSet:
+            foldErrT += errorRateT(classificationTrain, trainSet, target, attributes)
+        for element in validSet:
+            foldErrV += errorRateV(classification, validSet, target, attributes)
+    return foldErrT / k, foldErrV / k
 
-def errorRate(heuristic, vector):
+def errorRateT(classification, vector, target, attributes):
     errT = 0
+    for element in vector:
+        if classification[vector.index(element)] != element[attributes.index(target)]:
+            errT += 1
+    return errT
+
+def errorRateV(classification, vector, target, attributes):
     errV = 0
     for element in vector:
-        if heuristic != element:
-            errT += 1
+        if classification[vector.index(element)] != element[attributes.index(target)]:
             errV += 0.5
-    return errT, errV
+    return errV
 
 def get_classification(record, tree, attributes, default):
     """

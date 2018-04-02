@@ -29,7 +29,7 @@ for line in examples:
 # Useful for some datasets, where the target attribute's values are already sorted.
 random.shuffle(examples)
 # Useful to make sure that there's a correct split of the dataset.
-train, validation = cv.train_test_split(examples, len(examples)*0.5, len(examples) - 1)
+"""train, validation = cv.train_test_split(examples, len(examples)*0.5, len(examples) - 1)
 # While coding, I found that some algorithm just performed better using a dictionary, some others were better
 # using a list... so I've chosen to keep them both.
 training = []
@@ -40,14 +40,14 @@ for line in train:
 decTree = dt.decisionTreeLearning(trainingSet, attributes, targetAttr)
 # As long as I couldn't find any useful package, I provided also a fast function to print the tree. That was
 # inspired by Christopher Roach in the "archive.oreilly.com" website. I'll also report that in the README file.
-util.printTree(decTree, "")
+util.printTree(decTree, "") """
 # I provided ths due to the pluralityValue() function. I found out that makes it perform pretty well so... why not?
 list = [x[attributes.index(targetAttr)] for x in examples]
-""" After having the dataset structured in the right way, immediately calculates the plurality value, so
-    it can be used in the following tests."""
+# After having the dataset structured in the right way, immediately calculates the plurality value, so
+# it can be used in the following tests.
 default = dt.pluralityValue(list)
 # That's a test I run to prove that the classification works.
-classification = cv.classify(decTree, validation, attributes, default)
+"""classification = cv.classify(decTree, validation, attributes, default)
 # Some indexes and some print to ensure everything's fine.
 k = 0
 correct = 0
@@ -59,32 +59,44 @@ for el in classification:
         correct += 1
     k += 1
 # Some stats to look for problems and so on. At the moment, it performs really bad when the dataset's
-# splitted by half. Maybe overfitting?
+# splitted by half. Maybe overfitting? Nope, pruning already implemented.
 print "Numero di input testati: " + str(len(validation)) + "  " + " Numero di input corretti: " + str(correct)
 total = float(len(validation))
 ratio = ((float(correct))/(total))
 print "Percentuale di correttezza: " + str((ratio)*100) + "%"
 
-def kFoldCrossValidation(tree, k, examples, target, attributes):
-    foldErrT = 0
-    foldErrV = 0
-    for fold in range(1, k):
-        # Must change last two parameters in the function call...
-        trainSet, validSet = cv.train_test_split(examples, len(examples)*0.5, len(examples) - 1)
-        classification = cv.classify(tree, validSet, attributes, default)
-        foldErrT += errorRate(classification, trainSet, target, attributes)
-        foldErrV += errorRate(classification, validSet, target, attributes)
-    return foldErrT / k, foldErrV / k
+foldErrT, foldErrV = cv.kFoldCrossValidation(decTree, 5, examples, targetAttr, attributes, default)
+print "FoldErrT: " + str(foldErrT) + "  FoldErrV: " + str(foldErrV)"""
 
-def errorRate(classification, vector, target, attributes):
-    errT = 0
-    errV = 0
-    for element in vector:
-        # classification has 6 elements, while trainSet has 8, using that kind of split. Must check it.
-        if classification[vector.index(element)] != element[attributes.index(target)]:
-            errT += 1
-            errV += 0.5
-    return errT, errV
+def unknownDataTest(examples, attributes, target, times):
+    # The number of examples becomes bigger and bigger, so the tree becomes more accurate after every
+    # iteration.
+    for j in range(times):
+        print "####################"
+        print "### iterazione " + str(j) + " ###"
+        print "####################"
+        train, validation = cv.train_test_split(examples, (len(examples)/times) * j, len(examples) - 1)
+        training = []
+        for line in train:
+            training.append(dict(zip(attributes, [datum.strip() for datum in line])))
+        decisionTree = dt.decisionTreeLearning(training, attributes, target)
+        util.printTree(decisionTree, "")
+        classification = cv.classify(decisionTree, validation, attributes, default)
+        # Starting the test part
+        k = 0
+        correct = 0
+        for el in classification:
+            actual = validation[k][attributes.index(targetAttr)]
+            print "Input: " + str(validation[k])
+            print "Atteso: " + str(validation[k][attributes.index(targetAttr)]) + "  " + "Trovato: " + str(el)
+            if actual == el:
+                correct += 1
+            k += 1
+        print "Numero di input testati: " + str(len(validation)) + "  " + " Numero di input corretti: " + str(correct)
+        total = float(len(validation))
+        ratio = ((float(correct)) / (total))
+        print "Percentuale di correttezza: " + str((ratio) * 100) + "%"
+        foldErrT, foldErrV = cv.kFoldCrossValidation(decisionTree, 5, examples, targetAttr, attributes, default)
+        print "FoldErrT: " + str(foldErrT) + "  FoldErrV: " + str(foldErrV)
 
-foldErrT, foldErrV = kFoldCrossValidation(decTree, 5, examples, targetAttr, attributes)
-print "FoldErrT: " + str(foldErrT) + "  FoldErrV: " + str(foldErrV)
+unknownDataTest(examples, attributes, targetAttr, 5)
