@@ -75,6 +75,7 @@ def unknownDataTest(examples, attributes, target, times):
         print "####################"
         print "### iterazione " + str(j) + " ###"
         print "####################"
+        # random.shuffle(examples) ## This line just shuffles the examples array, so tests are randomized.
         train, validation = cv.train_test_split(examples, (len(examples)/times) * j, len(examples) - 1)
         training = []
         for line in train:
