@@ -3,20 +3,18 @@ import copy
 import Heuristics as heur
 import Utils as util
 
-def decisionTreeLearning(trainingSet, attributes, targetAttr):
+def decisionTreeLearning(trainingSet, attributes, targetAttr, default, criterion='entropy'):
 
     localTraining = copy.deepcopy(trainingSet)
     localAttr = copy.deepcopy(attributes)
     values = [record[targetAttr] for record in trainingSet]
-
-    default = pluralityValue(localTraining)
 
     if not localTraining or ((len(localAttr) - 1) <= 0):
         return default
     elif values.count(values[0]) == len(values):
         return values[0]
     else:
-        maxGainAttr = chooseBestAttribute(localTraining, attributes, targetAttr)
+        maxGainAttr = chooseBestAttribute(localTraining, attributes, targetAttr, criterion)
         decTree = {maxGainAttr: {}}
         # Create a new decision tree/sub-node for each of the values in the
         # best attribute field
@@ -24,7 +22,7 @@ def decisionTreeLearning(trainingSet, attributes, targetAttr):
             # Create a subtree for the current value under the "best" field
             subtree = decisionTreeLearning(getExamples(localTraining, maxGainAttr, value),
                                            [attr for attr in attributes if attr is not maxGainAttr],
-                                           targetAttr)
+                                           targetAttr, default, criterion)
 
             # Add the new subtree to the empty dictionary object in our new
             # tree/node we just created.
@@ -71,13 +69,23 @@ def pluralityValue(data):
 
     return mostFreq
 
-def chooseBestAttribute(data, attributes, target):
+def chooseBestAttribute(data, attributes, target, criterion):
     data = data[:]
     bestGain = 0.0
     bestAttr = None
 
     for attr in attributes:
-        gainAttr = heur.gain(data, attr, target)
+        try:
+            if criterion == 'gini':
+                gainAttr = heur.gainGini(data, attr, target)
+            elif criterion == 'entropy':
+                gainAttr = heur.gainEntr(data, attr, target)
+            elif criterion == 'missclass':
+                gainAttr = heur.gainMisclass(data, attr, target)
+            else:
+                raise Exception('No criterion with such name.')
+        except Exception as ex:
+            print ex.args
         if (gainAttr >= bestGain and attr != target):
             bestGain = gainAttr
             bestAttr = attr

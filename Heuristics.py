@@ -25,7 +25,7 @@ def entropy(data, targetAttr):
     return dataEntropy
 
 
-def gain(data, attr, targetAttr):
+def gainEntr(data, attr, targetAttr):
     """
     Calculates the information gain (reduction in entropy) that would
     result by splitting the data on the chosen attribute (attr).
@@ -51,71 +51,79 @@ def gain(data, attr, targetAttr):
     # whole data set with respect to the target attribute (and return it)
     return (entropy(data, targetAttr) - subsetEntropy)
 
+def gini(data, attr, targetAttr):
+    valFreq = {}
+    giniInd = 0.0
 
-def giniImpurity(examples, attributes):
-    total = len(examples)
-    counts = {}
-    imp = 0
-    for item in attributes:
-        counts.setdefault(str(item), 0)
-        imp = 0
-        for j in examples:
-            f1 = float(counts[str(j)]) / total
-            for k in examples:
-                if j == k:
-                    continue
-                f2 = float(counts[str(k)]) / total
-                imp += f1 * f2
-    return imp
+    for record in data:
+        if (valFreq.has_key(record[attr])):
+            valFreq[record[attr]] += 1.0
+        else:
+            valFreq[record[attr]] = 1.0
+    for val in valFreq.keys():
+        valProb = valFreq[val] / sum(valFreq.values())
+        giniInd += valProb*(1 - valProb)
+    return giniInd
 
-def giniIndex(examples, attributes):
-    total = len(examples)
-    imp = []
-    gini = 1
-    dictionary = {}
-    for attr in attributes:
-        dictionary[attr] = [ex[attributes.index(attr)] for ex in examples]
-        x = float(len(util.unique(dictionary[attr])))
-        actualGini = 1 - (x / total)
-        if actualGini < gini:
-            gini = actualGini
-            index = attributes.index(attr)
-    return gini, index
+def gainGini(data, attr, targetAttr):
+    """
+    Calculates the information gain (reduction in entropy) that would
+    result by splitting the data on the chosen attribute (attr).
+    """
+    valFreq = {}
+    subsetEntropy = 0.0
 
-def best_splitV6(feature_values, labels):
-    # training for each node/feature determining the threshold
-    feature_values, labels = np.array(feature_values), np.array(labels)
+    # Calculate the frequency of each of the values in the target attribute
+    for record in data:
+        if (valFreq.has_key(record[attr])):
+            valFreq[record[attr]] += 1.0
+        else:
+            valFreq[record[attr]] = 1.0
 
-    impurity = []
-    possible_thresholds = np.unique(feature_values)
+    # Calculate the sum of the entropy for each subset of records weighted
+    # by their probability of occuring in the training set.
+    for val in valFreq.keys():
+        valProb = valFreq[val] / sum(valFreq.values())
+        dataSubset = [record for record in data if record[attr] == val]
+        subsetEntropy += valProb * gini(dataSubset, attr, targetAttr)
 
-    num_labels = labels.size
+    # Subtract the entropy of the chosen attribute from the entropy of the
+    # whole data set with respect to the target attribute (and return it)
+    return (gini(data, attr, targetAttr) - subsetEntropy)
 
-    # the only relevant possibilities for a threshold are the feature values themselves except the lowest value
+def misclassificationError(data, attr, target):
+    valFreq = {}
 
-    for threshold in possible_thresholds:
-        # split node content based on threshold
-        # to do here: what happens if len(right) or len(left) is zero
-        selection = feature_values>=threshold
+    for record in data:
+        if (valFreq.has_key(record[attr])):
+            valFreq[record[attr]] += 1.0
+        else:
+            valFreq[record[attr]] = 1.0
+    maxValue = max(valFreq.values())
+    return 1.0 - maxValue / len(data)
 
-        right = labels[selection]
-        left = labels[~selection]
+def gainMisclass(data, attr, targetAttr):
+    """
+    Calculates the information gain (reduction in entropy) that would
+    result by splitting the data on the chosen attribute (attr).
+    """
+    valFreq = {}
+    subsetEntropy = 0.0
 
-        num_right = right.size
+    # Calculate the frequency of each of the values in the target attribute
+    for record in data:
+        if (valFreq.has_key(record[attr])):
+            valFreq[record[attr]] += 1.0
+        else:
+            valFreq[record[attr]] = 1.0
 
-        # compute distribution of labels for each split
-        _ , right_distribution = np.unique(right, return_counts=True)
-        _ , left_distribution = np.unique(left, return_counts=True)
+    # Calculate the sum of the entropy for each subset of records weighted
+    # by their probability of occuring in the training set.
+    for val in valFreq.keys():
+        valProb = valFreq[val] / sum(valFreq.values())
+        dataSubset = [record for record in data if record[attr] == val]
+        subsetEntropy += valProb * misclassificationError(dataSubset, attr, targetAttr)
 
-        # compute impurity of split based on the distribution
-        gini_right = 1 - np.sum((np.array(right_distribution) / num_right) ** 2)
-        gini_left = 1 - np.sum((np.array(left_distribution) / (num_labels-num_right)) ** 2)
-
-        # compute weighted total impurity of the split
-        gini_split = (num_right * gini_right + (num_labels-num_right) * gini_left) / num_labels
-
-        impurity.append(gini_split)
-
-
-    # returns the threshold with the highest associated impurity value --> best split threshold
-    return possible_thresholds[np.argmin(impurity)]
+    # Subtract the entropy of the chosen attribute from the entropy of the
+    # whole data set with respect to the target attribute (and return it)
+    return (misclassificationError(data, attr, targetAttr) - subsetEntropy)

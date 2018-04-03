@@ -1,4 +1,4 @@
-import numpy as np
+import random as rand
 import copy
 
 import DecisionTree as dt
@@ -21,19 +21,41 @@ def train_test_split(dataset, start, end):
     val = examples[start:end]
     return train, val
 
-def kFoldCrossValidation(tree, k, examples, target, attributes, default):
-    foldErrT = 0
-    foldErrV = 0
-    for fold in range(0, k - 1):
-        # Must change last two parameters in the function call...
-        trainSet, validSet = train_test_split(examples, (fold*len(examples))/k, ((fold + 1)*len(examples))/k)
-        classificationTrain = classify(tree, trainSet, attributes, default)
-        classification = classify(tree, validSet, attributes, default)
-        for element in trainSet:
-            foldErrT += errorRateT(classificationTrain, trainSet, target, attributes)
-        for element in validSet:
-            foldErrV += errorRateV(classification, validSet, target, attributes)
-    return foldErrT / k, foldErrV / k
+def kFoldCrossValidation(k, examples, target, attributes, default):
+    foldErr = 0
+    score = 0.0
+    giniScores = []
+    entropyScores = []
+    missclassScores = []
+    criteria = ['gini', 'entropy', 'missclass']
+    rand.shuffle(examples)
+    for fold in range(k):
+        print "####################"
+        print "### iterazione " + str(fold+1) + " ###"
+        print "####################"
+        print
+        trainSet, validSet = train_test_split(examples, (len(examples)/k)*fold, (len(examples)/k)*(fold+1))
+        training = []
+        for line in trainSet:
+            training.append(dict(zip(attributes, [datum.strip() for datum in line])))
+        for crit in criteria:
+            print "Criterio: " + crit
+            tree = dt.decisionTreeLearning(training, attributes, target, default, crit)
+            classification = classify(tree, validSet, attributes, default)
+            x = 0
+            for el in validSet:
+                if classification[x] == el[attributes.index(target)]:
+                    score += 1.0
+                x += 1
+            print "Round score: " + str(score/(len(validSet)))
+            if crit == 'gini':
+                giniScores.append(score/len(validSet))
+            elif crit == 'entropy':
+                entropyScores.append(score/len(validSet))
+            elif crit == 'missclass':
+                missclassScores.append(score/len(validSet))
+            score = 0.0
+    return (sum(giniScores))/k, (sum(entropyScores))/k, (sum(missclassScores))/k
 
 def errorRateT(classification, vector, target, attributes):
     errT = 0
@@ -41,13 +63,6 @@ def errorRateT(classification, vector, target, attributes):
         if classification[vector.index(element)] != element[attributes.index(target)]:
             errT += 1
     return errT
-
-def errorRateV(classification, vector, target, attributes):
-    errV = 0
-    for element in vector:
-        if classification[vector.index(element)] != element[attributes.index(target)]:
-            errV += 0.5
-    return errV
 
 def get_classification(record, tree, attributes, default):
     """
