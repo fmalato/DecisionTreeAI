@@ -5,14 +5,15 @@
 1. Set the program:
    For a proper use, you need to either set the local path to the chosen data set or place the data set in
    the project folder.
-   The program provides the first function at various line in the "demo.py" file: just modify the csv.reader("")
+   The program provides the first function at various line in the "demo.py" file: just modify the csv.reader("") 
    argument. Set it correctly, or it won't work.
 
-   As a second rule, you must either place the target attribute as the rightmost (last position) attribute in your
-   data set or change the targetAttr assignment in line 18, looking for the right values in your data set.
+   As a second rule, you must either place the target attribute as the rightmost (last position) attribute in your 
+   data set or change the targetAttr assignment, looking for the right values in your data set. Anyway, I highly 
+   recommend not to do this.
 
-   Remember also to set the proper delimiter (same lines as the path setting). Else, the program won't crash,
-   but won't even work properly.
+   Remember also to set the proper delimiter for the data set (same lines as the path setting). Else, the program
+   won't crash, but it won't even work properly.
 
 2. How to read the output:
    On the first part, the program will print some values and analytics like that:
