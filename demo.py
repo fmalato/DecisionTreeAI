@@ -10,8 +10,8 @@ sys.setrecursionlimit(1000000)
 # defines the used variables. After that, it just calls the kFoldCrossValidation(), which starts the test.
 # The data sets are chosen to represent some various scenarios: the first one has really messy data (and
 # beacuse of that, it scores a bit worse than the others), the second one is a normal data set, while the
-# third is nearly perfect (it's a bit smaller). Also, there's a fourth data set, not good for testing ( it
-# has only 14 elements), but is good to print its tree and show it.
+# third is nearly perfect (it's a bit smaller). Also, there's a fourth data set, not good for testing (it
+# has only 14 elements)... anyway, its main task is to give a graphic representation of the tree.
 print "--------------------------------------------------"
 print "----------- Dataset : Blood Donation -------------"
 print "--------------------------------------------------"
@@ -19,7 +19,7 @@ print
 csvFile1 = csv.reader(file('bloodDonation.csv'), delimiter=",")
 util.testDataset(csvFile1)
 print "--------------------------------------------------"
-print "--------- Dataset : Nursery Classifire -----------"
+print "--------- Dataset : Nursery Classifier -----------"
 print "--------------------------------------------------"
 print
 csvFile2 = csv.reader(file('nurseryClassifier.csv'), delimiter=",")
