@@ -35,9 +35,9 @@ print "-------------- Graphic Tree Print ----------------"
 print "--------------------------------------------------"
 print
 csvFile4 = csv.reader(file('playtennis.csv'), delimiter=",")
-# Definition of the needed variables
+# Definition of the variables.
 attributes, targetAttr, examples, trainingSet, lista = util.dataDefinition(csvFile4)
 default = dt.pluralityValue(lista)
 dtree = dt.decisionTreeLearning(trainingSet, attributes, targetAttr, default, 'entropy')
-# Printing a little tree, to show the way the decisionTreeLearning() function works.
+# Printing a little tree, in order to show the way the decisionTreeLearning() function works.
 util.printTree(dtree, "")
