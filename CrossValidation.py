@@ -12,7 +12,7 @@ def partition(vector, fold, k):
     return training, validationVector
 
 
-def train_test_split(dataset, start, end):
+def trainTestSplit(dataset, start, end):
     """Reserve dataset.examples[start:end] for test; train on the remainder."""
     start = int(start)
     end = int(end)
@@ -22,7 +22,12 @@ def train_test_split(dataset, start, end):
     return train, val
 
 def kFoldCrossValidation(k, examples, target, attributes, default):
-    foldErr = 0
+    # The data set is divided into five parts by the trainTestSplit() function. For every iteration,
+    # a different part of the data set is chosen as the validation set, while the others are used as
+    # the training for the tree. Every criterion is validated with the same train/valid split. For each
+    # iteration, then, a new tree is generated and tested.
+
+    # This first part just initialize the variables.
     score = 0.0
     giniScores = []
     entropyScores = []
@@ -34,7 +39,7 @@ def kFoldCrossValidation(k, examples, target, attributes, default):
         print "### iterazione " + str(fold+1) + " ###"
         print "####################"
         print
-        trainSet, validSet = train_test_split(examples, (len(examples)/k)*fold, (len(examples)/k)*(fold+1))
+        trainSet, validSet = trainTestSplit(examples, (len(examples)/k)*fold, (len(examples)/k)*(fold+1))
         training = []
         for line in trainSet:
             training.append(dict(zip(attributes, [datum.strip() for datum in line])))
@@ -57,18 +62,8 @@ def kFoldCrossValidation(k, examples, target, attributes, default):
             score = 0.0
     return (sum(giniScores))/k, (sum(entropyScores))/k, (sum(missclassScores))/k
 
-def errorRateT(classification, vector, target, attributes):
-    errT = 0
-    for element in vector:
-        if classification[vector.index(element)] != element[attributes.index(target)]:
-            errT += 1
-    return errT
-
-def get_classification(record, tree, attributes, default):
-    """
-    This function recursively traverses the decision tree and returns a
-    classification for the given record.
-    """
+def getClassification(record, tree, attributes, default):
+    # Given a record, it returns the classification for it.
     # If the current node is a string, then we've reached a leaf node and
     # we can return it as our answer
     if type(tree) == type("string"):
@@ -81,18 +76,25 @@ def get_classification(record, tree, attributes, default):
             t = tree[attr][record[attributes.index(attr)]]
         else:
             t = default
-        return get_classification(record, t, attributes, default)
+        return getClassification(record, t, attributes, default)
 
 
 def classify(tree, data, attributes, default):
-    """
-    Returns a list of classifications for each of the records in the data
-    list as determined by the given decision tree.
-    """
+    # For each record, appends a classification on a list and ultimately returns that list.
     data = data[:]
     classification = []
 
     for record in data:
-        classification.append(get_classification(record, tree, attributes, default))
+        classification.append(getClassification(record, tree, attributes, default))
 
     return classification
+
+def unknownDataTest(examples, attributes, target, times):
+    # Tests on unknown data. The tree is trained and then tested on the examples attribute, which matches
+    # with the test set.
+    lista = [x[attributes.index(target)] for x in examples]
+    default = dt.pluralityValue(lista)
+    giniScores, entrScores, misclassScores = kFoldCrossValidation(times, examples, target, attributes, default)
+    print
+    print "Media giniScores: " + str(giniScores) + "  Media entrScores: " + str(entrScores) +\
+          "  Media misClassScores: " + str(misclassScores)

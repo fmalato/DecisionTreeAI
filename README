@@ -3,16 +3,42 @@
 ##############################
 
 1. Set the program:
-   For a proper use of the program, you need to set the local path to the chosen data set.
-   The program provides this function at line 15 in the "demo.py" file. Set it correctly, or it won't work.
+   For a proper use, you need to either set the local path to the chosen data set or place the data set in
+   the project folder.
+   The program provides the first function at various line in the "demo.py" file: just modify the csv.reader("")
+   argument. Set it correctly, or it won't work.
 
-   As a second rule, you must either place the target attribute as the rightmost attribute in your data set or
-   change the targetAttr assignment in line 18, looking for the right values in your data set.
+   As a second rule, you must either place the target attribute as the rightmost (last position) attribute in your
+   data set or change the targetAttr assignment in line 18, looking for the right values in your data set.
 
-   Remember also to set the proper delimiter (line 15). Else, the program won't crash, but won't even work properly.
+   Remember also to set the proper delimiter (same lines as the path setting). Else, the program won't crash,
+   but won't even work properly.
 
 2. How to read the output:
-   The program will print a bunch of values, arrows and names, like this one:
+   On the first part, the program will print some values and analytics like that:
+
+   --------------------------------------------------
+   ----------- Dataset : Blood Donation -------------
+   --------------------------------------------------
+
+   ####################
+   ### iterazione 5 ###
+   ####################
+
+   Criterio: gini
+   Round score: 0.785234899329
+   Criterio: entropy
+   Round score: 0.791946308725
+   Criterio: missclass
+   Round score: 0.778523489933
+
+   Media giniScores: 0.742281879195  Media entrScores: 0.747651006711  Media misClassScores: 0.740939597315
+
+   The first two lines just give you informations about the current data set and iteration. Then, you
+   are given an information about the current criterion and a sequence of the scores for the current iteration
+   is reported as a decimal number. The score is given as a decimal number, but it has to be intended as a
+   precentual number.
+   On the second part, the program will print a bunch of values, arrows and names, like this one:
 
    density
 	--->	0.99754
@@ -24,11 +50,24 @@
 				--->	8.8
 								----->	5
 
-	the output has the following rules:
+	this output has the following rules:
 	- Each name stands for a node name, which stands for a specific attribute of the data set;
 	- Each arrows stands for a branch, i.e. a different unique value of the attribute upon the arrow;
 	- Each number stands for a unique value of the splitter attribute, which is the weight of that specific branch;
 	- If there's another arrows under a number, without any label, it means that there's no need to split on another
 	  attribute. In that case, every branch leads to a leaf;
 	- If there are no more arrows nor labels after a number, it means that such a number is a leaf of the tree.
+
+3. Special thanks:
+   This "special thanks" section is intended as a needed citation to the websites/books that have helped me during
+   the coding phase.
+
+   - Christopher Roach and his article "Building Decision Trees in Python"
+     (http://archive.oreilly.com/pub/a/python/2006/02/09/ai_decision_trees.html?page=1)
+     Thanks for giving me tips and tricks, clear explanations (and also ideas) for some functions.
+   - The StackOverflow Community
+     (https://stackoverflow.com/)
+     Thanks for providing me the tons of answered question about the topic I have been studying.
+   - S.Russell, P.Norvig "Artificial Intelligence: a Modern Approach"
+     Thanks for the exhaustive theorical explanation of every single aspect of this program (and also for the puns!)
 
