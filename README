@@ -70,5 +70,6 @@
      (https://stackoverflow.com/)
      Thanks for providing me the tons of answered question about the topic I have been studying.
    - S.Russell, P.Norvig "Artificial Intelligence: a Modern Approach"
-     Thanks for the exhaustive theorical explanation of every single aspect of this program (and also for the puns!)
+     Thanks for the exhaustive theorical explanation of every single aspect of this program and for the
+     train_test_split() function on the aima-python repository (and also for the puns!)
 
