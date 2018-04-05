@@ -14,8 +14,12 @@
 
    Remember also to set the proper delimiter for the data set (same lines as the path setting). Else, the program
    won't crash, but it won't even work properly.
+   
+2. How to run the program:
+   To run the program, just execute the demo.py file, making sure you have made a good setting following the previous
+   point.
 
-2. How to read the output:
+3. How to read the output:
    On the first part, the program will print some values and analytics like that:
 
    --------------------------------------------------
