@@ -63,7 +63,7 @@
 	  attribute. In that case, every branch leads to a leaf;
 	- If there are no more arrows nor labels after a number, it means that such a number is a leaf of the tree.
 
-3. Special thanks:
+4. Special thanks:
    This "special thanks" section is intended as a needed citation to the websites/books that have helped me during
    the coding phase.
 
